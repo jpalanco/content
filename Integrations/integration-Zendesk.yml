@@ -201,6 +201,16 @@ script:
         }
     };
 
+    var getUserIdByEmail = function(email) {
+        var reqRequester = sendRequest('GET', 'users/search.json', '', {query: 'type:user email:' + email});
+
+        if (reqRequester.users.length > 0) {
+            return reqRequester.users[0].id;
+        } else {
+            return false;
+        }
+    };
+
     var createTicket = function() {
         var ec = {Ticket: []};
         var md = '## Zendesk tickets\n';
@@ -216,21 +226,17 @@ script:
             };
 
         if (args.requester_email) {
-            var reqRequester = sendRequest('GET', 'users/search.json', '', {query: args.requester_email});
+            body.ticket.requester_id = getUserIdByEmail(args.requester_email);
 
-            if (reqRequester.users.length > 0) {
-                body.ticket.requester_id = reqRequester.users[0].id;
-            } else {
+            if (!body.ticket.requester_id) {
                 throw 'There is no such requester email';
             }
         }
 
         if (args.assignee_email) {
-            var reqAssignee = sendRequest('GET', 'users/search.json', '', {query: args.assignee_email});
+            body.ticket.assignee_id = getUserIdByEmail(args.assignee_email);
 
-            if (reqAssignee.users.length > 0) {
-                body.ticket.assignee_id = reqAssignee.users[0].id;
-            } else {
+            if (!body.ticket.assignee_id) {
                 throw 'There is no such assignee email';
             }
         }
@@ -395,6 +401,19 @@ script:
         md += 'Comment added successfully.\n';
         return ( {'ContentsFormat': formats.json, 'Type': entryTypes.note, 'Contents': res, "HumanReadable": md} );
     };
+
+    var deleteUser = function() {
+        userId = getUserByEmail(args.email)
+
+        if (!userId) {
+            throw 'There is not user with such email'
+        }
+
+        res = sendRequest('DELETE', 'users/' + userId + '.json');
+        md = 'Zendesk user deleted successfuly - ' + args.email + '\n';
+        return ( {'ContentsFormat': formats.json, 'Type': entryTypes.note, 'Contents': res, "HumanReadable": md} );
+    };
+
 
     var addUser = function() {
         var body = {
@@ -670,6 +689,9 @@ script:
         case 'zendesk-add-user':
             return addUser();
 
+        case 'zendesk-delete-user':
+            return deleteUser();
+
         case 'fetch-incidents':
             return fetchIncidents();
 
@@ -899,5 +921,12 @@ script:
     - name: locale
       description: Locale. Defaults to en-us
     description: Get Zendesk Help Center article
+  - name: zendesk-delete-user
+    arguments:
+    - name: email
+      required: true
+      description: User email address
+    description: Delete a user
+    execution: true
   isfetch: true
-fromversion: 3.5.0
+  releaseNotes: Added zendesk-delete-user command
