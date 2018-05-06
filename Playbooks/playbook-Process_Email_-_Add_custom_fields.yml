@@ -2,7 +2,8 @@ id: process_email_-_add_custom_fields
 version: -1
 name: Process Email - Add custom fields
 fromversion: 3.6.0
-releaseNotes: "-"Process email - Add email data to a phishing incident custom fields
+releaseNotes: "-"
+description: Process email - Add email data to a phishing incidents custom fields
 starttaskid: "0"
 tasks:
   "0":
