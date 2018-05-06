@@ -224,6 +224,7 @@ tasks:
       name: Process Email - EWS
       description: ""
       playbookName: Process Email - EWS
+      playbookId: process_email_-_ews
       type: playbook
       iscommand: false
       brand: ""
@@ -371,6 +372,7 @@ tasks:
       name: Process Email - Add custom fields
       description: ""
       playbookName: Process Email - add custom fields
+      playbookId: process_email_-_add_custom_fields
       type: playbook
       iscommand: false
       brand: ""
