@@ -1,6 +1,6 @@
-id: process_email_-_generic
+id: process_email_-_generic_v2
 version: -1
-name: Process Email - Generic
+name: Process Email - Generic_v2
 fromversion: 3.6.0
 releaseNotes: "Add support for EWS and Phishing default mapping"
 description: Add email details to the relevant context entities and handle the case
