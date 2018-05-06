@@ -399,7 +399,7 @@ tasks:
     task:
       id: c398e131-67cd-447e-8e8b-feb09501d5a4
       version: -1
-      name: Process Email - Generic
+      name: Process Email - Generic_v2
       description: ""
       playbookName: Process Email - Generic
       type: playbook
