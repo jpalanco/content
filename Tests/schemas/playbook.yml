@@ -69,6 +69,8 @@ mapping:
               description:
                 type: str
                 required: true
+              reputationcalc:
+                type: float
               scriptName:
                 type: str
               script:
