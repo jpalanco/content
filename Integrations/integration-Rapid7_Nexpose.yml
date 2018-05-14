@@ -80,13 +80,17 @@ script:
         var finalResult = [];
         var pageDiff = 0;
         var pageNumber = 0;
+        var queryParams = queryParams || {};
+
         do{
             queryParams.page = pageNumber++;
             var response = sendRequest(path, 'GET', queryParams);
             if(!response){
                 break;
             }
-            finalResult = finalResult.concat(response.resources);
+            if(response.resources){
+                finalResult = finalResult.concat(response.resources);
+            }
             if(response.page){
                 pageDiff = response.page.totalPages - response.page.number;
             }
@@ -95,17 +99,50 @@ script:
         return finalResult;
     }
 
+    function getLastScan(asset){
+        if(!asset.history){
+            return "-";
+        }
+        var sorted = asset.history.sort(function(a,b){
+            return new Date(b.date) - new Date(a.date);
+        });
+
+        return sorted[0] ? sorted[0].date : '-';
+
+    }
     function getAssetsCommand(){
         var assets = getAssets(args);
+
+        if(!assets || assets.length === 0){
+            return "No assets found";
+        }
+
+        var hrAssets = [];
+        assets.forEach(function(asset){
+            var hrAsset = {
+                Address: asset.ip,
+                Name: asset.hostName,
+                Site: '',
+                Exploits: dq(asset.vulnerabilities, 'exploits'),
+                Malware: dq(asset.vulnerabilities, 'malwareKits'),
+                OperatingSystem: asset.os,
+                Vulnerabilities: dq(asset.vulnerabilities, 'total'),
+                Risk: asset.riskScore,
+                Assessed: asset.assessedForVulnerabilities,
+                LastScan: getLastScan(asset),
+            }
+
+            hrAssets.push(hrAsset);
+        });
+
         var entry = {
             Type: entryTypes.note,
             Contents: assets,
             ContentsFormat: formats.json
         };
 
-
         entry.ReadableContentsFormat = formats.markdown;
-        entry.HumanReadable = tableToMarkdown('Assets' , assets);
+        entry.HumanReadable = tableToMarkdown('Assets' , hrAssets);
         entry.EntryContext = {
             'Nexpose.Asset(val.id==obj.id)': assets
         };
@@ -114,18 +151,36 @@ script:
     }
 
     function getAssetCommand(){
-        var assets = getAssets(args, args.id);
+        var asset = getAssets(args, args.id);
         delete(args.id);
+
+        if(!asset){
+            return "Asset not found";
+        }
+
+        var hrAsset = {
+            Addresses: dq(asset.addresses, 'ip'),
+            Hardware: asset.mac, // ?
+            Aliases: dq(asset.hostNames, 'name'),
+            HostType: asset.type,
+            Site: '',
+            UniqueIdentifiers: '',
+            OS: asset.os,
+            CPE: dq(asset, 'cpe.v2.3'),
+            LastScan: getLastScan(asset),
+            RiskScore: asset.riskScore,
+            RawRiskScore: asset.rawRiskScore
+        }
+
         var entry = {
             Type: entryTypes.note,
-            Contents: assets,
+            Contents: asset,
             ContentsFormat: formats.json
         };
-
         entry.ReadableContentsFormat = formats.markdown;
-        entry.HumanReadable = tableToMarkdown('Asset' , assets);
+        entry.HumanReadable = tableToMarkdown('Asset' , hrAsset);
         entry.EntryContext = {
-            'Nexpose.Asset(val.id==obj.id)': assets
+            'Nexpose.Asset(val.id==obj.id)': asset
         }
 
         return entry;
@@ -140,12 +195,274 @@ script:
             return getListResponse(path, queryParams);
         }
 
-        log(path);
         return sendRequest(path, 'GET', queryParams);
     }
 
-    var entry;
+    function getVulnerabilitiesCommand(){
+        var assetId = args.id;
+        delete(args.id);
 
+        var vulnerabilities = getVulnerabilities(assetId, args);
+
+        if(!vulnerabilities || vulnerabilities.length === 0){
+            return "No vulnerabilities found";
+        }
+
+        var hrVulnerabilities = [];
+        var contextVulnerabilities = [];
+        vulnerabilities.forEach(function(v){
+            var vulnerability = getVulnerability(v.id);
+            contextVulnerabilities.push(vulnerability);
+            var hrVulnerability = {
+                Title: vulnerability.title,
+                Malware: vulnerability.malwareKits,
+                Exploit: vulnerability.exploits,
+                CVSS: dq(vulnerability.cvss, 'v3.score'),
+                Risk: vulnerability.riskScore,
+                PublishedOn: vulnerability.published,
+                ModifiedOn: vulnerability.modified,
+                Severity: vulnerability.severity,
+                Instances: v.instances,
+                Exceptions: dq(v.results, 'exceptions')
+            };
+
+            hrVulnerabilities.push(hrVulnerability);
+        });
+
+        var entry = {
+            Type: entryTypes.note,
+            Contents: vulnerabilities,
+            ContentsFormat: formats.json
+        };
+        entry.ReadableContentsFormat = formats.markdown;
+        entry.HumanReadable = tableToMarkdown('Asset ' + assetId + ' Vulnerabilities' , hrVulnerabilities);
+        entry.EntryContext = {
+            'Nexpose.Vulnerability(val.id==obj.id)': contextVulnerabilities
+        }
+
+        return entry;
+    }
+
+    function getVulnerabilities(assetId, queryParams){
+        var path = 'assets/' + assetId + '/vulnerabilities';
+
+        return getListResponse(path, queryParams);
+    }
+
+    function getVulnerability(vulnerabilityId){
+        var path = 'vulnerabilities/' + vulnerabilityId;
+
+        return sendRequest(path, 'GET');
+    }
+
+    function getSoftwareCommand(){
+        var assetId = args.id;
+        delete(args.id);
+        var software = getSoftware(assetId, args);
+
+        if(!software || software.length === 0){
+            return "No software found";
+        }
+
+        var hrSoftware = [];
+        software.forEach(function(s){
+           var hrs = {
+               Software: s.description,
+               version: s.version
+           };
+           hrSoftware.push(hrs);
+        });
+
+        var entry = {
+            Type: entryTypes.note,
+            Contents: software,
+            ContentsFormat: formats.json
+        };
+        entry.ReadableContentsFormat = formats.markdown;
+        entry.HumanReadable = tableToMarkdown('Asset ' + assetId + ' Installed software' , hrSoftware);
+        entry.EntryContext = {
+            'Nexpose.Software(val.id==obj.id)': software
+        }
+
+        return entry;
+    }
+
+    function getSoftware(assetId, queryParams){
+        var path = 'assets/' + assetId + '/software';
+
+        return getListResponse(path, queryParams);
+    }
+
+    function getServicesCommand(){
+        var assetId = args.id;
+        delete(args.id);
+        var services = getServices(assetId, args);
+
+        if(!services || services.length === 0){
+            return "No services found";
+        }
+
+        var hrServices = [];
+        var contextServices = [];
+        services.forEach(function(s){
+            if(s.protocol && s.port){
+                var service = getService(assetId, s.protocol, s.port);
+                contextServices.push(service);
+                var vulnerabilities = getServiceVulnerabilities(assetId, s.protocol, s.port);
+                var hrService = {
+                    ServiceName: service.name,
+                    Product: service.product,
+                    Port: service.port,
+                    Vulnerabilities: vulnerabilities ? vulnerabilities.length : '0',
+                    Users: service.users ? service.users.length : '0',
+                    Groups: service.userGroups ? service.userGroups.length : '0',
+                };
+
+                hrServices.push(hrService);
+            }
+        });
+
+        var entry = {
+            Type: entryTypes.note,
+            Contents: services,
+            ContentsFormat: formats.json
+        };
+        entry.ReadableContentsFormat = formats.markdown;
+        entry.HumanReadable = tableToMarkdown('Asset ' + assetId + ' Services' , hrServices);
+        entry.EntryContext = {
+            'Nexpose.Service(val.product + port==obj.product + port)': contextServices
+        }
+
+        return entry;
+    }
+
+    function getServices(assetId, queryParams){
+        var path = 'assets/' + assetId + '/services';
+
+        return getListResponse(path, queryParams);
+    }
+
+    function getService(assetId, protocol, port){
+        var path = 'assets/' + assetId + '/services/' + protocol + '/' + port;
+
+        return sendRequest(path, 'GET');
+    }
+
+    function getServiceVulnerabilities(assetId, protocol, port){
+        var path = 'assets/' + assetId + '/services/' + protocol + '/' + port + '/vulnerabilities';
+
+        return getListResponse(path);
+    }
+
+    function getUserCommand(){
+        var userId = args.id;
+        delete(args.id);
+
+        var user = getUser(userId);
+
+        if(!user){
+            return "User not found";
+        }
+
+        var groups = getUserGroups(userId);
+        log(Object.keys(groups));
+        var sites = getUserSites(userId);
+
+        var hrUser = {
+            Authenticator: dq(user.authentication, 'id'),
+            UserName: dq(user.authentication, 'name'),
+            FullName: user.name,
+            Email: user.email,
+            Administrator: '',
+            UserRole: dq(user.role, 'name'),
+            LastLogon: '',
+            PasswordExpires: '',
+            Disabled: '',
+            Sites: sites ? sites.length : 0,
+            Groups: groups ? groups.length : 0
+        };
+
+        var entry = {
+            Type: entryTypes.note,
+            Contents: user,
+            ContentsFormat: formats.json
+        };
+        entry.ReadableContentsFormat = formats.markdown;
+        entry.HumanReadable = tableToMarkdown('User', hrUser);
+        entry.EntryContext = {
+            'Nexpose.User(val.id==obj.id)': user
+        }
+
+        return entry;
+    }
+
+    function getUser(userId){
+        var path = 'users/' + userId;
+
+        return sendRequest(path, 'GET');
+    }
+
+    function getUserGroups(userId){
+        var path = 'users/' + userId + '/asset_groups';
+
+        return getListResponse(path);
+    }
+
+    function getUserSites(userId){
+        var path = 'users/' + userId + '/sites'
+
+        return getListResponse(path);
+    }
+
+    function getScanCommand(){
+        var scanId = args.id;
+        delete(args.id);
+
+        var scan = getScan(scanId);
+
+        if(!scan){
+            return 'Scan not found';
+        }
+
+        var vulnerabilitiesCount = 0;
+        for(key in scan.vulnerabilities){
+            vulnerabilitiesCount += scan.vulnerabilities[key];
+        }
+
+        var hrScan = {
+            Site: '',
+            ScanType: scan.scanType,
+            ScanName: scan.scanName,
+            StartedBy: scan.startedBy,
+            Assets: scan.assets,
+            Vulnerabilities: vulnerabilitiesCount,
+            TotalTime: scan.duration,
+            Completed: scan.endTime,
+            Status: scan.status,
+            Engine: scan.engineName
+        }
+
+        var entry = {
+            Type: entryTypes.note,
+            Contents: scan,
+            ContentsFormat: formats.json
+        };
+        entry.ReadableContentsFormat = formats.markdown;
+        entry.HumanReadable = tableToMarkdown('Scan', hrScan);
+        entry.EntryContext = {
+            'Nexpose.Scan(val.id==obj.id)': scan
+        }
+
+        return entry;
+    }
+
+    function getScan(scanId){
+        var path = 'scans/' + scanId;
+
+        return sendRequest(path, 'GET');
+    }
+
+    var entry;
     switch (command) {
         // This is the call made when pressing the integration test button.
         case 'test-module':
@@ -161,8 +478,23 @@ script:
         case 'nexpose-get-assets':
             var entry = getAssetsCommand();
             break;
-         case 'nexpose-get-asset':
+        case 'nexpose-get-asset':
             var entry = getAssetCommand();
+            break;
+        case 'nexpose-get-asset-vulnerabilities':
+            var entry = getVulnerabilitiesCommand();
+            break;
+        case 'nexpose-get-asset-software':
+            var entry = getSoftwareCommand();
+            break;
+        case 'nexpose-get-asset-services':
+            var entry = getServicesCommand();
+            break;
+        case 'nexpose-get-user':
+            var entry = getUserCommand();
+            break;
+        case 'nexpose-get-scan':
+            var entry = getScanCommand();
             break;
     }
 
@@ -175,8 +507,9 @@ script:
       description: 'The criteria to sort the records by, in the format: property[,ASC|DESC].
         The default sort order is ascending. Multiple sort criteria can be specified
         using multiple sort query parameters.'
+      isArray: true
     - name: size
-      description: integer <int32> The number of records per page to retrieve.ß
+      description: integer <int32> The number of records per page to retrieve.
     description: Returns all assets for which you have access.
   - name: nexpose-get-asset
     arguments:
@@ -184,5 +517,49 @@ script:
       required: true
       description: integer <int64> The identifier of the asset.
     description: Returns the specified asset.
+  - name: nexpose-get-asset-vulnerabilities
+    arguments:
+    - name: size
+      description: integer <int32> The number of records to retrieve.
+    - name: sort
+      description: 'The criteria to sort the records by, in the format: property[,ASC|DESC].
+        The default sort order is ascending. Multiple sort criteria can be specified
+        using multiple sort query parameters.'
+    - name: id
+      required: true
+      description: integer <int64> The identifier of the asset.
+    description: Retrieves all vulnerability findings on an asset. A finding may be
+      invulnerable if all instances have exceptions applied.
+  - name: nexpose-get-asset-software
+    arguments:
+    - name: id
+      required: true
+      description: integer <int64> The identifier of the asset.
+    - name: size
+      description: integer <int32> The number of records to retrieve.
+    - name: sort
+      description: 'The criteria to sort the records by, in the format: property[,ASC|DESC].
+        The default sort order is ascending. Multiple sort criteria can be specified
+        using multiple sort query parameters.'
+    description: Returns the installed software on a specified asset.
+  - name: nexpose-get-asset-services
+    arguments:
+    - name: id
+      required: true
+      description: integer <int64> The identifier of the asset.
+    description: Returns the services discovered on an asset.
+  - name: nexpose-get-user
+    arguments:
+    - name: id
+      required: true
+      description: integer <int32> The identifier of the user.
+    description: 'Returns the details for a user. PRIVILEGES: Global Administrator,
+      Current User'
+  - name: nexpose-get-scan
+    arguments:
+    - name: id
+      required: true
+      description: integer <int64> The identifier of the scan.
+    description: Returns the specified scan.
   runonce: false
 releaseNotes: "-"
