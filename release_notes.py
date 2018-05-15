@@ -542,8 +542,8 @@ def main(argv):
             missingReleaseNotes = True
         else:
             res += ans
-    if missingReleaseNotes == True:
-        sys.exit(1)
+    #if missingReleaseNotes == True:
+    #    sys.exit(1)
     version = argv[0]
     assetId = argv[3]
     createContentDescriptor(version, assetId, res)
