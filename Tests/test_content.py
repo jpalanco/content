@@ -67,7 +67,7 @@ def main():
         with open(secret_conf_path) as data_file:
             secret_conf = json.load(data_file)
 
-    tests = conf['tests']
+    tests = []
 
     secret_params = secret_conf['integrations'] if secret_conf else []
 
