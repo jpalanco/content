@@ -2,7 +2,7 @@
   "id": "unassigned-incidents-number",
   "version": -1,
   "fromVersion": "3.5.0",
-  "name": "Unassigned Incidents",
+  "name": "Unassigned {incTermCapitalPlural}",
   "dataType": "incidents",
   "widgetType": "number",
   "query": "-category:job and -status:archived and -status:closed and owner:\"\"",

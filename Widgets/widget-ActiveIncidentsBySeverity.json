@@ -2,7 +2,7 @@
   "id": "active-incidents-by-severity",
   "version": -1,
   "fromVersion": "3.5.0",
-  "name": "Active Incidents by Severity",
+  "name": "Active {incTermCapitalPlural} by Severity",
   "dataType": "incidents",
   "widgetType": "pie",
   "query": "-category:job and -status:archived and -status:closed",

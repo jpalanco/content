@@ -2,7 +2,7 @@
   "id": "incident-severity-by-types",
   "version": -1,
   "fromVersion": "3.5.0",
-  "name": "Incident Severity by Type",
+  "name": "{incTermCapitalSingular} Severity by Type",
   "dataType": "incidents",
   "widgetType": "bar",
   "query": "-category:job and -status:archived and -status:closed",

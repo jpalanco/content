@@ -2,7 +2,7 @@
   "id": "active-incidents-by-type",
   "version": -1,
   "fromVersion": "3.5.0",
-  "name": "Active Incidents by Type",
+  "name": "Active {incTermCapitalPlural} by Type",
   "dataType": "incidents",
   "widgetType": "line",
   "query": "-category:job and -status:archived and -status:closed",

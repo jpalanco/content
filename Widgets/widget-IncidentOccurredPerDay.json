@@ -1,7 +1,7 @@
 {
   "id": "incidents-occurred-per-day",
   "version": -1,
-  "name": "Incidents Occurred Per Day",
+  "name": "{incTermCapitalPlural} Occurred Per Day",
   "dataType": "incidents",
   "widgetType": "line",
   "query": "-category:job",

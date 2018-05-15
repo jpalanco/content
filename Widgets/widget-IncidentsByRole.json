@@ -1,7 +1,7 @@
 {
   "id": "incidents-by-role",
   "version": -1,
-  "name": "Incidents by Role",
+  "name": "{incTermCapitalPlural} by Role",
   "dataType": "incidents",
   "widgetType": "bar",
   "query": "-category:job and -status:closed",

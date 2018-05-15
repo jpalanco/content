@@ -2,7 +2,7 @@
   "id": "incidents-by-phase",
   "version": -1,
   "fromVersion": "3.5.0",
-  "name": "Incidents by Phase",
+  "name": "{incTermCapitalPlural} by Phase",
   "dataType": "incidents",
   "widgetType": "pie",
   "size": 5,

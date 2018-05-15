@@ -2,7 +2,7 @@
   "id": "incidents-assigned-by-user",
   "version": -1,
   "fromVersion": "3.5.0",
-  "name": "Incidents Assigned by User",
+  "name": "{incTermCapitalPlural} Assigned by User",
   "dataType": "incidents",
   "widgetType": "bar",
   "query": "-category:job and -status:archived and -status:closed",

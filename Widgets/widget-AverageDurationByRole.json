@@ -2,7 +2,7 @@
   "id": "average-incident-duration-by-role",
   "version": -1,
   "fromVersion": "3.5.0",
-  "name": "Average Incident Duration by Role (Avg)",
+  "name": "Average {incTermCapitalSingular} Duration by Role (Avg)",
   "dataType": "incidents",
   "widgetType": "column",
   "size": 5,

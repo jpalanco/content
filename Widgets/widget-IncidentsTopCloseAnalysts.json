@@ -1,7 +1,7 @@
 {
   "id": "incidents-top-close-analysts",
   "version": -1,
-  "name": "Incidents Top Close Analysts",
+  "name": "{incTermCapitalPlural} Top Close Analysts",
   "dataType": "incidents",
   "widgetType": "bar",
   "query": "-category:job and status:Closed",

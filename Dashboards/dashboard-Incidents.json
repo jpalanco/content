@@ -12,7 +12,7 @@
     "field": ""
   },
   "fromDateLicense": "0001-01-01T00:00:00Z",
-  "name": "Incidents",
+  "name": "{incTermCapitalPlural}",
   "layout": [
     {
       "id": "8efbf5c0-e4ff-11e7-b60b-df7995291baf",
@@ -25,7 +25,7 @@
       "widget": {
         "id": "active-incidents-by-severity",
         "version": -1,
-        "name": "Active Incidents by Severity",
+        "name": "Active {incTermCapitalPlural} by Severity",
         "dataType": "incidents",
         "widgetType": "pie",
         "query": "-category:job and -status:archived and -status:closed",
@@ -62,7 +62,7 @@
       "widget": {
         "id": "active-incidents-by-type",
         "version": -1,
-        "name": "Active Incidents by Type",
+        "name": "Active {incTermCapitalPlural} by Type",
         "dataType": "incidents",
         "widgetType": "line",
         "query": "-category:job and -status:archived and -status:closed",
@@ -100,7 +100,7 @@
       "widget": {
         "id": "unassigned-incidents",
         "version": -1,
-        "name": "Unassigned Incidents",
+        "name": "Unassigned {incTermCapitalPlural}",
         "dataType": "incidents",
         "widgetType": "list",
         "query": "-category:job and -status:archived and -status:closed and owner:\"\"",
@@ -146,7 +146,7 @@
       "widget": {
         "id": "",
         "version": -1,
-        "name": "Unassigned Incidents",
+        "name": "Unassigned {incTermCapitalPlural}",
         "dataType": "incidents",
         "widgetType": "trend",
         "query": "-category:job and -status:archived and -status:closed and owner:\"\"",
@@ -189,7 +189,7 @@
       "widget": {
         "id": "",
         "version": -1,
-        "name": "Late Incidents",
+        "name": "Late {incTermCapitalPlural}",
         "dataType": "incidents",
         "widgetType": "trend",
         "query": "-category:job and -status:archived and -status:closed and dueDate:<now",
@@ -232,7 +232,7 @@
       "widget": {
         "id": "late-incidents",
         "version": -1,
-        "name": "Late Incidents",
+        "name": "Late {incTermCapitalPlural}",
         "dataType": "incidents",
         "widgetType": "list",
         "query": "-category:job and -status:archived and -status:closed and dueDate:<now",
@@ -278,7 +278,7 @@
       "widget": {
         "id": "incidents-assigned-by-user",
         "version": -1,
-        "name": "Incidents Assigned by User",
+        "name": "{incTermCapitalPlural} Assigned by User",
         "dataType": "incidents",
         "widgetType": "bar",
         "query": "-category:job and -status:archived and -status:closed",
@@ -316,7 +316,7 @@
       "widget": {
         "id": "incident-severity-by-types",
         "version": -1,
-        "name": "Incident Severity by Type",
+        "name": "{incTermCapitalSingular} Severity by Type",
         "dataType": "incidents",
         "widgetType": "bar",
         "query": "-category:job and -status:archived and -status:closed",
@@ -512,7 +512,7 @@
       "widget": {
         "id": "todays-new-incidents",
         "version": -1,
-        "name": "Today's New Incidents",
+        "name": "Today's New {incTermCapitalPlural}",
         "dataType": "incidents",
         "widgetType": "trend",
         "query": "-status:closed -category:job",

@@ -2,7 +2,7 @@
   "id": "incidents-dropped-in-preprocessing",
   "version": -1,
   "fromVersion": "3.5.0",
-  "name": "Incidents Dropped in Preprocessing",
+  "name": "{incTermCapitalPlural} Dropped in Preprocessing",
   "dataType": "audit",
   "category": "incidents",
   "widgetType": "number",

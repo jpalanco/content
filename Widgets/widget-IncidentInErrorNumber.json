@@ -1,7 +1,7 @@
 {
   "id": "incidents-error-number",
   "version": -1,
-  "name": "Incidents in Error Run Status",
+  "name": "{incTermCapitalPlural} in Error Run Status",
   "dataType": "incidents",
   "widgetType": "number",
   "query": "runStatus:error",

@@ -2,7 +2,7 @@
   "id": "sla-by-incident-type",
   "version": -1,
   "fromVersion": "3.5.0",
-  "name": "SLA by Incident Type",
+  "name": "SLA by {incTermCapitalSingular} Type",
   "dataType": "incidents",
   "widgetType": "bar",
   "size": 5,

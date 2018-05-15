@@ -2,7 +2,7 @@
   "id": "late-incidents",
   "version": -1,
   "fromVersion": "3.5.0",
-  "name": "Late Incidents",
+  "name": "Late {incTermCapitalPlural}",
   "dataType": "incidents",
   "widgetType": "list",
   "query": "-category:job and -status:archived and -status:closed and dueDate:<now",
