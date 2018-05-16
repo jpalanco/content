@@ -237,7 +237,7 @@ script:
         entry.ReadableContentsFormat = formats.markdown;
         entry.HumanReadable = tableToMarkdown('Asset ' + assetId + ' Vulnerabilities' , hrVulnerabilities);
         entry.EntryContext = {
-            'Nexpose.Vulnerability(val.id==obj.id)': contextVulnerabilities
+            'Nexpose.Asset.Vulnerability(val.id==obj.id)': contextVulnerabilities
         }
 
         return entry;
@@ -462,6 +462,65 @@ script:
         return sendRequest(path, 'GET');
     }
 
+    function getAssetVulnerabilitySolutionsCommand(){
+        var assetId = args.id;
+        var vulnerabilityId = args.vulnerabilityId;
+        // why asset?
+        delete(args.assetId);
+        delete(args.vulnerabilityId);
+
+        var solutions = getVulnerabilitySolutions(vulnerabilityId);
+
+        if(!solutions || solutions.length === 0){
+            return "No solutions found";
+        }
+
+        if(!(solutions instanceof Array)){
+            solutions = [solutions];
+        }
+
+        var contextSolutions = [];
+        var hrSolutions = [];
+
+        solutions.forEach(function(s){
+            var solution = getSolution(s);
+            contextSolutions.push(solution);
+            var hrSolution = {
+                AdditionalInformation: s.additionalInformation,
+                Estimate: solution.estimate,
+                Steps: dq(solution.steps, 'text'),
+                Summary: dq(solution.summary, 'text'),
+                Type: solution.type
+            }
+
+            hrSolutions.push(hrSolution);
+        });
+
+        var entry = {
+            Type: entryTypes.note,
+            Contents: contextSolutions,
+            ContentsFormat: formats.json
+        };
+        entry.ReadableContentsFormat = formats.markdown;
+        entry.HumanReadable = tableToMarkdown('Solutions for vulnerability ' + vulnerabilityId, hrSolutions);
+        entry.EntryContext = {
+            'Nexpose.Asset.Vulnerability.Solution(val.id==obj.id)': contextSolutions
+        }
+
+        return entry;
+    }
+
+    function getVulnerabilitySolutions(vulnerabilityId){
+        var path = 'vulnerabilities/' + vulnerabilityId + '/solutions';
+
+        return getListResponse(path);
+    }
+
+    function getSolution(solutionId){
+        var path = 'solutions/' + solutionId;
+
+        return sendRequest(path, 'GET');
+    }
     var entry;
     switch (command) {
         // This is the call made when pressing the integration test button.
@@ -495,6 +554,9 @@ script:
             break;
         case 'nexpose-get-scan':
             var entry = getScanCommand();
+            break;
+        case 'nexpose-get-asset-vulnerability-solution':
+            var entry = getAssetVulnerabilitySolutionsCommand();
             break;
     }
 
@@ -561,5 +623,14 @@ script:
       required: true
       description: integer <int64> The identifier of the scan.
     description: Returns the specified scan.
+  - name: nexpose-get-asset-vulnerability-solution
+    arguments:
+    - name: id
+      required: true
+      description: integer <int64> The identifier of the asset.
+    - name: vulnerabilityId
+      required: true
+      description: <string> The identifier of the vulnerability.
+    description: Returns the details for solutions that can remediate a given vulnerability.
   runonce: false
 releaseNotes: "-"
